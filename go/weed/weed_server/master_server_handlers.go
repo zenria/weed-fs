@@ -52,16 +52,16 @@ func (ms *MasterServer) dirAssignHandler(w http.ResponseWriter, r *http.Request)
 		writeJsonQuiet(w, r, map[string]string{"error": err.Error()})
 		return
 	}
-
-	if ms.topo.GetVolumeLayout(collection, rt).GetActiveVolumeCount(dataCenter) <= 0 {
-		if ms.topo.FreeSpace() <= 0 {
+	// Grow volumes when there is only 1 volume left
+	if ms.topo.GetVolumeLayout(collection, rt).GetActiveVolumeCount(dataCenter) <= 1 {
+		if ms.topo.FreeSpace() <= 0 && ms.topo.GetVolumeLayout(collection, rt).GetActiveVolumeCount(dataCenter) == 0 {
 			w.WriteHeader(http.StatusNotFound)
 			writeJsonQuiet(w, r, map[string]string{"error": "No free volumes left!"})
 			return
 		} else {
 			ms.vgLock.Lock()
 			defer ms.vgLock.Unlock()
-			if ms.topo.GetVolumeLayout(collection, rt).GetActiveVolumeCount(dataCenter) <= 0 {
+			if ms.topo.GetVolumeLayout(collection, rt).GetActiveVolumeCount(dataCenter) <= 1 {
 				if _, err = ms.vg.AutomaticGrowByType(collection, rt, dataCenter, ms.topo); err != nil {
 					writeJsonQuiet(w, r, map[string]string{"error": "Cannot grow volume group! " + err.Error()})
 					return
