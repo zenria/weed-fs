@@ -39,7 +39,7 @@ func NewVolumeServer(r *mux.Router, version string, ip string, port int, publicU
 	r.HandleFunc("/admin/vacuum_volume_compact", secure(vs.whiteList, vs.vacuumVolumeCompactHandler))
 	r.HandleFunc("/admin/vacuum_volume_commit", secure(vs.whiteList, vs.vacuumVolumeCommitHandler))
 	r.HandleFunc("/admin/freeze_volume", secure(vs.whiteList, vs.freezeVolumeHandler))
-	r.HandleFunc("/", vs.storeHandler)
+	r.HandleFunc("/{fid}", vs.storeHandler)
 
 	go func() {
 		connected := true
