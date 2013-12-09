@@ -262,11 +262,12 @@ func (s *Store) Write(i VolumeId, n *Needle) (size uint32, err error) {
 			err = fmt.Errorf("Volume %s is read only!", i)
 			return
 		} else {
-			if s.volumeSizeLimit >= v.ContentSize()+uint64(size) {
+			// disable HARD limit to avoid write hole where the master is assigning files to full volumes
+			//if s.volumeSizeLimit >= v.ContentSize()+uint64(size) {
 				size, err = v.write(n)
-			} else {
-				err = fmt.Errorf("Volume Size Limit %d Exceeded! Current size is %d", s.volumeSizeLimit, v.ContentSize())
-			}
+			//} else {
+			//	err = fmt.Errorf("Volume Size Limit %d Exceeded! Current size is %d", s.volumeSizeLimit, v.ContentSize())
+			//}
 			if err != nil && s.volumeSizeLimit < v.ContentSize()+uint64(size) && s.volumeSizeLimit >= v.ContentSize() {
 				glog.V(0).Infoln("volume", i, "size is", v.ContentSize(), "close to", s.volumeSizeLimit)
 				if err = s.Join(); err != nil {
