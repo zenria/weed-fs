@@ -26,10 +26,11 @@ type Store struct {
 	rack            string //optional information, overwriting master setting if exists
 	connected       bool
 	volumeSizeLimit uint64 //read from the master
+	lenientMaxVolumeSize bool
 }
 
-func NewStore(port int, ip, publicUrl string, dirnames []string, maxVolumeCounts []int) (s *Store) {
-	s = &Store{Port: port, Ip: ip, PublicUrl: publicUrl}
+func NewStore(port int, ip, publicUrl string, dirnames []string, maxVolumeCounts []int,lenientMaxVolSize bool) (s *Store) {
+	s = &Store{Port: port, Ip: ip, PublicUrl: publicUrl, lenientMaxVolumeSize: lenientMaxVolSize}
 	s.locations = make([]*DiskLocation, 0)
 	for i := 0; i < len(dirnames); i++ {
 		location := &DiskLocation{directory: dirnames[i], maxVolumeCount: maxVolumeCounts[i]}
@@ -262,13 +263,11 @@ func (s *Store) Write(i VolumeId, n *Needle) (size uint32, err error) {
 			err = fmt.Errorf("Volume %s is read only!", i)
 			return
 		} else {
-			// FIXME this should be configurable
-			// disable HARD limit to avoid write hole where the master is assigning files to full volumes
-			//if s.volumeSizeLimit >= v.ContentSize()+uint64(size) {
+			if !s.lenientMaxVolumeSize && s.volumeSizeLimit >= v.ContentSize()+uint64(size)  {
 				size, err = v.write(n)
-			//} else {
-			//	err = fmt.Errorf("Volume Size Limit %d Exceeded! Current size is %d", s.volumeSizeLimit, v.ContentSize())
-			//}
+			} else {
+				err = fmt.Errorf("Volume Size Limit %d Exceeded! Current size is %d", s.volumeSizeLimit, v.ContentSize())
+			}
 			if err != nil && s.volumeSizeLimit < v.ContentSize()+uint64(size) && s.volumeSizeLimit >= v.ContentSize() {
 				glog.V(0).Infoln("volume", i, "size is", v.ContentSize(), "close to", s.volumeSizeLimit)
 				if err = s.Join(); err != nil {

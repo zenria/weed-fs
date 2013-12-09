@@ -42,7 +42,7 @@ var (
 	serverWhiteListOption     = cmdServer.Flag.String("whiteList", "", "comma separated Ip addresses having write permission. No limit if empty.")
 	masterPort                = cmdServer.Flag.Int("masterPort", 9333, "master server http listen port")
 	masterMetaFolder          = cmdServer.Flag.String("mdir", os.TempDir(), "data directory to store meta data")
-	masterVolumeSizeLimitMB   = cmdServer.Flag.Uint("volumeSizeLimitMB", 32*1024, "Default Volume Size in MegaBytes")
+	masterVolumeSizeLimitMB   = cmdServer.Flag.Uint("volumeSizeLimitMB", 24*1024, "Default Volume Size in MegaBytes")
 	masterConfFile            = cmdServer.Flag.String("conf", "/etc/weedfs/weedfs.conf", "xml configuration file")
 	masterDefaultRepType      = cmdServer.Flag.String("defaultReplicationType", "000", "Default replication type if not specified.")
 	volumePort                = cmdServer.Flag.Int("port", 8080, "volume server http listen port")
@@ -50,6 +50,7 @@ var (
 	volumeDataFolders         = cmdServer.Flag.String("dir", os.TempDir(), "directories to store data files. dir[,dir]...")
 	volumeMaxDataVolumeCounts = cmdServer.Flag.String("max", "7", "maximum numbers of volumes, count[,count]...")
 	volumePulse               = cmdServer.Flag.Int("pulseSeconds", 5, "number of seconds between heartbeats, must be smaller than the master's setting")
+	lenientMaxVolumeSize      = cmdServer.Flag.Bool("lenientMaxVolumeSize", true, "if true, allows volume server to still accept data even if the volumeSizeLimit has been reach")
 
 	serverWhiteList []string
 )
@@ -96,7 +97,7 @@ func runServer(cmd *Command, args []string) bool {
 	go func() {
 		r := mux.NewRouter()
 		weed_server.NewMasterServer(r, VERSION, *masterPort, *masterMetaFolder,
-			*masterVolumeSizeLimitMB, *volumePulse, *masterConfFile, *masterDefaultRepType, *garbageThreshold, serverWhiteList,
+			*masterVolumeSizeLimitMB, *volumePulse, *masterConfFile, *masterDefaultRepType, *garbageThreshold, *lenientMaxVolumeSize, serverWhiteList,
 		)
 
 		glog.V(0).Infoln("Start Weed Master", VERSION, "at port", *serverIp+":"+strconv.Itoa(*masterPort))

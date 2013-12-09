@@ -29,7 +29,7 @@ var (
 	mport                 = cmdMaster.Flag.Int("port", 9333, "http listen port")
 	mip                   = cmdMaster.Flag.String("ip", "localhost", "http listen port")
 	metaFolder            = cmdMaster.Flag.String("mdir", os.TempDir(), "data directory to store meta data")
-	volumeSizeLimitMB     = cmdMaster.Flag.Uint("volumeSizeLimitMB", 32*1024, "Default Volume Size in MegaBytes")
+	volumeSizeLimitMB     = cmdMaster.Flag.Uint("volumeSizeLimitMB", 24*1024, "Default Volume Size in MegaBytes")
 	mpulse                = cmdMaster.Flag.Int("pulseSeconds", 5, "number of seconds between heartbeats")
 	confFile              = cmdMaster.Flag.String("conf", "/etc/weedfs/weedfs.conf", "xml configuration file")
 	defaultRepType        = cmdMaster.Flag.String("defaultReplicationType", "000", "Default replication type if not specified.")
@@ -37,7 +37,6 @@ var (
 	mMaxCpu               = cmdMaster.Flag.Int("maxCpu", 0, "maximum number of CPUs. 0 means all available CPUs")
 	garbageThreshold      = cmdMaster.Flag.String("garbageThreshold", "0.3", "threshold to vacuum and reclaim spaces")
 	masterWhiteListOption = cmdMaster.Flag.String("whiteList", "", "comma separated Ip addresses having write permission. No limit if empty.")
-
 	masterWhiteList []string
 )
 

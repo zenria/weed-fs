@@ -21,6 +21,7 @@ type VolumeServer struct {
 func NewVolumeServer(r *mux.Router, version string, ip string, port int, publicUrl string, folders []string, maxCounts []int,
 	masterNode string, pulseSeconds int,
 	dataCenter string, rack string,
+	lenientMaxVolumeSize bool,
 	whiteList []string) *VolumeServer {
 	vs := &VolumeServer{
 		version:      version,
@@ -30,7 +31,7 @@ func NewVolumeServer(r *mux.Router, version string, ip string, port int, publicU
 		rack:         rack,
 		whiteList:    whiteList,
 	}
-	vs.store = storage.NewStore(port, ip, publicUrl, folders, maxCounts)
+	vs.store = storage.NewStore(port, ip, publicUrl, folders, maxCounts, lenientMaxVolumeSize)
 
 	r.HandleFunc("/submit", secure(vs.whiteList, vs.submitFromVolumeServerHandler))
 	r.HandleFunc("/status", secure(vs.whiteList, vs.statusHandler))

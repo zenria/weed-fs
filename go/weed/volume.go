@@ -37,7 +37,7 @@ var (
 	dataCenter            = cmdVolume.Flag.String("dataCenter", "", "current volume server's data center name")
 	rack                  = cmdVolume.Flag.String("rack", "", "current volume server's rack name")
 	volumeWhiteListOption = cmdVolume.Flag.String("whiteList", "", "comma separated Ip addresses having write permission. No limit if empty.")
-
+	lenientMaxVolumeSize  = cmdVolume.Flag.Bool("lenientMaxVolumeSize", true, "if true, allows volume server to still accept data even if the volumeSizeLimit has been reach")
 	volumeWhiteList []string
 )
 
@@ -82,7 +82,7 @@ func runVolume(cmd *Command, args []string) bool {
 	r := mux.NewRouter()
 
 	weed_server.NewVolumeServer(r, VERSION, *ip, *vport, *publicUrl, folders, maxCounts,
-		*masterNode, *vpulse, *dataCenter, *rack, volumeWhiteList,
+		*masterNode, *vpulse, *dataCenter, *rack, *lenientMaxVolumeSize, volumeWhiteList,
 	)
 
 	glog.V(0).Infoln("Start Weed volume server", VERSION, "at http://"+*ip+":"+strconv.Itoa(*vport))
