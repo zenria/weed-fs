@@ -262,6 +262,7 @@ func (s *Store) Write(i VolumeId, n *Needle) (size uint32, err error) {
 			err = fmt.Errorf("Volume %s is read only!", i)
 			return
 		} else {
+			// FIXME this should be configurable
 			// disable HARD limit to avoid write hole where the master is assigning files to full volumes
 			//if s.volumeSizeLimit >= v.ContentSize()+uint64(size) {
 				size, err = v.write(n)
