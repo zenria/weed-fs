@@ -92,7 +92,11 @@ func (vs *VolumeServer) GetOrHeadHandler(w http.ResponseWriter, r *http.Request,
 		debug("parsing error:", err, r.URL.Path)
 		return
 	}
-	n.ParsePath(fid)
+	err = n.ParsePath(fid)
+	if err != nil {
+		glog.V(2).Infoln("parsing fid error:", err, r.URL.Path)
+		return
+	}
 
 	debug("volume", volumeId, "reading", n)
 	if !vs.store.HasVolume(volumeId) {
