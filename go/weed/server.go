@@ -50,7 +50,7 @@ var (
 	volumeDataFolders         = cmdServer.Flag.String("dir", os.TempDir(), "directories to store data files. dir[,dir]...")
 	volumeMaxDataVolumeCounts = cmdServer.Flag.String("max", "7", "maximum numbers of volumes, count[,count]...")
 	volumePulse               = cmdServer.Flag.Int("pulseSeconds", 5, "number of seconds between heartbeats, must be smaller than the master's setting")
-	lenientMaxVolumeSize      = cmdServer.Flag.Bool("lenientMaxVolumeSize", true, "if true, allows volume server to still accept data even if the volumeSizeLimit has been reach")
+	lenientMaxVSize      = cmdServer.Flag.Bool("lenientMaxVolumeSize", true, "if true, allows volume server to still accept data even if the volumeSizeLimit has been reach")
 
 	serverWhiteList []string
 )
@@ -97,7 +97,7 @@ func runServer(cmd *Command, args []string) bool {
 	go func() {
 		r := mux.NewRouter()
 		weed_server.NewMasterServer(r, VERSION, *masterPort, *masterMetaFolder,
-			*masterVolumeSizeLimitMB, *volumePulse, *masterConfFile, *masterDefaultRepType, *garbageThreshold, *lenientMaxVolumeSize, serverWhiteList,
+			*masterVolumeSizeLimitMB, *volumePulse, *masterConfFile, *masterDefaultRepType, *garbageThreshold, serverWhiteList,
 		)
 
 		glog.V(0).Infoln("Start Weed Master", VERSION, "at port", *serverIp+":"+strconv.Itoa(*masterPort))
@@ -114,7 +114,7 @@ func runServer(cmd *Command, args []string) bool {
 
 	r := mux.NewRouter()
 	weed_server.NewVolumeServer(r, VERSION, *serverIp, *volumePort, *volumePublicUrl, folders, maxCounts,
-		*serverIp+":"+strconv.Itoa(*masterPort), *volumePulse, *serverDataCenter, *serverRack, serverWhiteList,
+		*serverIp+":"+strconv.Itoa(*masterPort), *volumePulse, *serverDataCenter, *serverRack, *lenientMaxVSize, serverWhiteList,
 	)
 
 	glog.V(0).Infoln("Start Weed volume server", VERSION, "at http://"+*serverIp+":"+strconv.Itoa(*volumePort))
