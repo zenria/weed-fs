@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	VERSION = "0.45"
+	VERSION = "0.45.1-scoopit"
 )
 
 var cmdVersion = &Command{
