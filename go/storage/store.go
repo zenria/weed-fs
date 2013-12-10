@@ -263,7 +263,7 @@ func (s *Store) Write(i VolumeId, n *Needle) (size uint32, err error) {
 			err = fmt.Errorf("Volume %s is read only!", i)
 			return
 		} else {
-			if !s.lenientMaxVolumeSize && s.volumeSizeLimit >= v.ContentSize()+uint64(size)  {
+			if s.lenientMaxVolumeSize || s.volumeSizeLimit >= v.ContentSize()+uint64(size)  {
 				size, err = v.write(n)
 			} else {
 				err = fmt.Errorf("Volume Size Limit %d Exceeded! Current size is %d", s.volumeSizeLimit, v.ContentSize())
