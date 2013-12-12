@@ -25,7 +25,9 @@ func ReplicatedWrite(masterNode string, s *storage.Store, volumeId storage.Volum
 	if needToReplicate { //send to other replica locations
 		if r.FormValue("type") != "replicate" {
 			if !distributedOperation(masterNode, s, volumeId, func(location operation.Location) bool {
-				_, err := operation.Upload("http://"+location.Url+r.URL.Path+"?type=replicate&ts="+strconv.FormatUint(needle.LastModified, 10), string(needle.Name), bytes.NewReader(needle.Data), needle.IsGzipped(), string(needle.Mime))
+				replicationUrl:=location.Url+r.URL.Path
+				glog.V(4).Infoln("Replicating volume=",volumeId," to ", replicationUrl)
+				_, err := operation.Upload("http://"+replicationUrl+"?type=replicate&ts="+strconv.FormatUint(needle.LastModified, 10), string(needle.Name), bytes.NewReader(needle.Data), needle.IsGzipped(), string(needle.Mime))
 				return err == nil
 			}) {
 				ret = 0
@@ -76,12 +78,17 @@ func distributedOperation(masterNode string, store *storage.Store, volumeId stor
 		selfUrl := (store.Ip + ":" + strconv.Itoa(store.Port))
 		results := make(chan bool)
 		for _, location := range lookupResult.Locations {
+			glog.V(4).Infoln("Distributed operation on url=", location.Url," publicUrl=",location.PublicUrl)
 			if location.Url != selfUrl {
+				glog.V(4).Infoln("Distributed operation execution on url=", location.Url," publicUrl=",location.PublicUrl)
 				length++
 				go func(location operation.Location, results chan bool) {
 					results <- op(location)
 				}(location, results)
+			} else {
+				glog.V(4).Infoln("Distributed operation on self, nothing done on url=", location.Url," publicUrl=",location.PublicUrl)
 			}
+				
 		}
 		ret := true
 		for i := 0; i < length; i++ {
