@@ -394,7 +394,9 @@ func init() {
 	flag.Var(&logging.stderrThreshold, "stderrthreshold", "logs at or above this threshold go to stderr")
 	flag.Var(&logging.vmodule, "vmodule", "comma-separated list of pattern=N settings for file-filtered logging")
 	flag.Var(&logging.traceLocation, "log_backtrace_at", "when logging hits line file:N, emit a stack trace")
-
+    flag.BoolVar(&logging.syncAtFlush, "synclogatflush", false, "sync log files when flushing logs to disk, default: true")
+    flag.DurationVar(&flushInterval, "flush_interval", 1*time.Second, "how often the logs are flushed to disk, default 1 second")
+    
 	// Default stderrThreshold is ERROR.
 	logging.stderrThreshold = errorLog
 
@@ -414,6 +416,7 @@ type loggingT struct {
 	// compatibility. TODO: does this matter enough to fix? Seems unlikely.
 	toStderr     bool // The -logtostderr flag.
 	alsoToStderr bool // The -alsologtostderr flag.
+	syncAtFlush  bool // The -synclogatflush flaf
 
 	// Level flag. Handled atomically.
 	stderrThreshold severity // The -stderrthreshold flag.
@@ -557,8 +560,8 @@ func (l *loggingT) header(s severity) *buffer {
 	buf.twoDigits(9, minute)
 	buf.tmp[11] = ':'
 	buf.twoDigits(12, second)
-	//buf.tmp[14] = '.'
-	//buf.nDigits(6, 15, now.Nanosecond()/1000)
+	buf.tmp[14] = '.'
+	buf.nDigits(6, 15, now.Nanosecond()/1000)
 	buf.tmp[21] = ' '
 	buf.nDigits(5, 22, pid) // TODO: should be TID
 	buf.tmp[27] = ' '
@@ -828,7 +831,7 @@ func (l *loggingT) createFiles(sev severity) error {
 	return nil
 }
 
-const flushInterval = 30 * time.Second
+var flushInterval time.Duration
 
 // flushDaemon periodically flushes the log file buffers.
 func (l *loggingT) flushDaemon() {
@@ -852,7 +855,9 @@ func (l *loggingT) flushAll() {
 		file := l.file[s]
 		if file != nil {
 			file.Flush() // ignore error
-			file.Sync()  // ignore error
+			if(logging.syncAtFlush) {
+				file.Sync()  // ignore error
+			}
 		}
 	}
 }
