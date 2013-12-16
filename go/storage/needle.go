@@ -102,10 +102,12 @@ func NewNeedle(r *http.Request) (n *Needle, e error) {
 	if len(fname) < 256 {
 		n.Name = []byte(fname)
 		n.SetHasName()
+		glog.V(5).Infoln("NewNeedle: name",fname)
 	}
 	if len(mimeType) < 256 {
 		n.Mime = []byte(mimeType)
 		n.SetHasMime()
+		glog.V(5).Infoln("NewNeedle: mimeType",mimeType)
 	}
 	if isGzipped {
 		n.SetGzipped()
