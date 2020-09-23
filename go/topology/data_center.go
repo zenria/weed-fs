@@ -31,6 +31,7 @@ func (dc *DataCenter) ToMap() interface{} {
 	m := make(map[string]interface{})
 	m["Max"] = dc.GetMaxVolumeCount()
 	m["Free"] = dc.FreeSpace()
+	m["Id"] = dc.Id()
 	var racks []interface{}
 	for _, c := range dc.Children() {
 		rack := c.(*Rack)

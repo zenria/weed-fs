@@ -54,6 +54,7 @@ func (rack *Rack) ToMap() interface{} {
 	m := make(map[string]interface{})
 	m["Max"] = rack.GetMaxVolumeCount()
 	m["Free"] = rack.FreeSpace()
+	m["Id"] = rack.Id()
 	var dns []interface{}
 	for _, c := range rack.Children() {
 		dn := c.(*DataNode)
